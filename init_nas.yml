@@ -1,0 +1,18 @@
+- name: Setup hostname and hosts file
+  hosts: controllers
+  gather_facts: false
+  tasks:
+  - name: Change hostname
+    become: yes
+    hostname:
+      name: "nas{{ play_hosts.index(inventory_hostname)|int+1 }}"
+    when: external_nas is defined and external_nas == "Y"
+  - debug: msg="setting up controller {{ play_hosts.index(inventory_hostname)|int+1 }}"
+    when: external_nas is defined and external_nas == "Y"
+  - import_tasks: tasks/cluster/hosts_setup_tasks.yml
+    when: external_nas is defined and external_nas == "Y"
+- name: Setup NFS
+  hosts: controllers
+  gather_facts: true
+  tasks:
+  - import_tasks: tasks/cluster/nas_nfs_tasks.yml

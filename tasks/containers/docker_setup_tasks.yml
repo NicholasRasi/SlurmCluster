@@ -1,0 +1,32 @@
+- name: Remove old Docker versions
+  become: yes
+  yum:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+    state: removed
+- name: Setup repository
+  become: yes
+  shell: |
+    yum-config-manager --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+- name: Install Docker
+  become: yes
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+- name: Start Docker
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes

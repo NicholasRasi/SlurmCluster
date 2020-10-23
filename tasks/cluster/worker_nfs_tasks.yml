@@ -1,0 +1,24 @@
+- name: Install nfs-utils
+  become: yes
+  yum:
+    name:
+      - nfs-utils
+    state: latest
+- name: Create nfs dir
+  become: yes
+  file:
+    path: "{{ ansible_env.HOME }}/workspace"
+    state: directory
+- name: Mount nfs dir
+  become: yes
+  mount:
+    path: "{{ ansible_env.HOME }}/workspace"
+    src: "nfs1:{{ ansible_env.HOME }}/workspace"
+    fstype: nfs
+    state: mounted
+- name: Add auto mount nfs dir
+  become: yes
+  lineinfile:
+    path: /etc/fstab
+    line: "nfs1:{{ ansible_env.HOME }}/workspace {{ ansible_env.HOME }}/workspace nfs defaults 0 0"
+    state: present

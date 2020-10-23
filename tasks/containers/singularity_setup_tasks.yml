@@ -1,0 +1,44 @@
+- name: Install Singularity deps
+  become: yes
+  yum:
+    name:
+      - "@Development Tools"
+      - openssl-devel
+      - libuuid-devel
+      - libseccomp-devel
+      - wget
+      - squashfs-tools
+      - cryptsetup
+    state: latest
+- name: Install GO
+  shell: |
+    export VERSION={{ go_ver }} OS=linux ARCH=amd64 && \
+    wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
+    sudo tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
+    rm go$VERSION.$OS-$ARCH.tar.gz
+- name: Add GO to PATH 1/2
+  lineinfile:
+    line: export GOPATH=${HOME}/go
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    state: present
+- name: Add GO to PATH 2/2
+  lineinfile:
+    line: export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    state: present
+- name: Source bashrc
+  shell: source ~/.bashrc
+- name: Install Singularity
+  shell: |
+    export VERSION={{ singularity_ver }} && \
+    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz && \
+    tar -xzf singularity-${VERSION}.tar.gz && \
+    cd singularity && \
+    ./mconfig && \
+    make -C ./builddir && \
+    sudo make -C ./builddir install
+- name: Test Singularity
+  shell: singularity exec library://alpine cat /etc/alpine-release
+  register: singularity_output
+- debug: msg="singularity_output {{ singularity_output.stdout }}"
+

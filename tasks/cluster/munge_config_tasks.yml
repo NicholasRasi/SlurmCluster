@@ -1,0 +1,11 @@
+- name: Set Munge chown and chmod
+  become: yes
+  shell: |
+    chown -R munge: /etc/munge/ /var/log/munge/
+    chmod 0700 /etc/munge/ /var/log/munge/
+- name: Start and enable Munge
+  become: yes
+  service:
+    name: munge
+    state: started
+    enabled: yes

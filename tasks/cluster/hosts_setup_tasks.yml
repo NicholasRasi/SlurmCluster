@@ -1,0 +1,6 @@
+- name: Copy hosts file
+  become: yes
+  copy:
+    src: "{{playbook_dir}}/conf/hosts"
+    dest: /etc/hosts
+    force: yes

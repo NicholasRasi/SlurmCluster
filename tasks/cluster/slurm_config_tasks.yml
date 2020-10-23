@@ -1,0 +1,12 @@
+- name: Copy slurm config file
+  become: yes
+  copy:
+    src: "{{playbook_dir}}/conf/slurm.conf"
+    dest: /etc/slurm/slurm.conf
+- name: Create slurm spool dir
+  become: yes
+  file:
+    path: /var/spool/slurm
+    state: directory
+    owner: slurm
+    group: slurm

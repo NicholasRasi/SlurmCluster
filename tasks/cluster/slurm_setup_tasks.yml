@@ -1,0 +1,50 @@
+- name: Setup Slurm users and groups
+  ignore_errors: yes
+  become: yes
+  shell: |
+    export SlurmUSER=1002
+    groupadd -g $SlurmUSER slurm
+    useradd  -m -c "Slurm workload manager" -d /var/lib/slurm -u $SlurmUSER -g slurm  -s /bin/bash slurm
+- name: Install Slurm deps
+  become: yes
+  yum:
+    name:
+      - rpm-build
+      - gcc
+      - openssl
+      - openssl-devel
+      - libssh2-devel
+      - pam-devel
+      - numactl
+      - numactl-devel
+      - hwloc
+      - hwloc-devel
+      - lua
+      - lua-devel
+      - readline-devel
+      - rrdtool-devel
+      - ncurses-devel
+      - gtk2-devel
+      - libssh2-devel
+      - libibmad
+      - libibumad
+      - perl-Switch
+      - perl-ExtUtils-MakeMaker
+      - python3
+      - mariadb-server
+      - mariadb-devel
+    state: latest
+- name: Download and build Slurm
+  shell: |
+    wget -c https://download.schedmd.com/slurm/slurm-{{ slurm_ver }}.tar.bz2
+    rpmbuild -ta slurm-{{ slurm_ver }}.tar.bz2 --without mysql
+- name: Remove old Slurm rpms
+  ignore_errors: yes
+  become: yes
+  shell: |
+    yum -y erase `yum list installed | cut -d " " -f 1  | grep slurm`
+- name: Install Slurm rpms
+  become: yes
+  shell: |
+    cd rpmbuild/RPMS/x86_64/
+    yum -y install slurm-{{ slurm_ver }}*rpm slurm-devel-{{ slurm_ver }}*rpm slurm-perlapi-{{ slurm_ver }}*rpm slurm-torque-{{ slurm_ver }}*rpm slurm-example-configs-{{ slurm_ver }}*rpm

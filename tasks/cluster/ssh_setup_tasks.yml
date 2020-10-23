@@ -1,0 +1,11 @@
+- name: Set ssh_config to allow root login
+  become: yes
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: PermitRootLogin yes
+- name: Set ssh config to disable StrictHostKeyChecking
+  shell: |
+    mkdir -p ~/.ssh     
+    echo "Host *" > ~/.ssh/config
+    echo " StrictHostKeyChecking no" >> ~/.ssh/config

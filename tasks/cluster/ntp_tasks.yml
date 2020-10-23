@@ -1,0 +1,31 @@
+- name: Install ntp
+  become: yes
+  yum:
+    name:
+      - ntp
+      - ntpdate
+    state: latest
+- name: Start ntpd
+  become: yes
+  service:
+    name: ntpd
+    state: started
+    enabled: yes
+- name: Update ntpdate
+  ignore_errors: yes
+  become: yes
+  shell: ntpdate -u -s 0.centos.pool.ntp.org 1.centos.pool.ntp.org 2.centos.pool.ntp.org
+- name: Restart ntpd
+  become: yes
+  service:
+    name: ntpd
+    state: restarted
+    enabled: yes
+- name: Set hwclock
+  become: yes
+  shell: hwclock -w
+- name: Run timedatectl
+  become: yes
+  command: timedatectl
+  register: timedatectl_out
+- debug: msg="{{ timedatectl_out.stdout }}"

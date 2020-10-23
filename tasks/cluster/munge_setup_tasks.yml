@@ -1,0 +1,21 @@
+- name: Setup Munge users and groups
+  ignore_errors: yes
+  become: yes
+  shell: |
+    export MUNGEUSER=1001
+    groupadd -g $MUNGEUSER munge
+    useradd  -m -c "MUNGE Uid 'N' Gid Emporium" -d /var/lib/munge -u $MUNGEUSER -g munge  -s /sbin/nologin munge
+- name: Install epel-release
+  become: yes
+  yum:
+    name:
+      - epel-release
+    state: latest
+- name: Install Munge
+  become: yes
+  yum:
+    name:
+      - munge
+      - munge-libs
+      - munge-devel
+    state: latest

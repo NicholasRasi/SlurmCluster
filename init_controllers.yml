@@ -1,0 +1,67 @@
+- name: Setup hostname and hosts file
+  hosts: controllers
+  gather_facts: false
+  tasks:
+  - name: Change hostname
+    become: yes
+    hostname:
+      name: "controller{{ play_hosts.index(inventory_hostname)|int+1 }}"
+  - debug: msg="setting up controller {{ play_hosts.index(inventory_hostname)|int+1 }}"
+  - import_tasks: tasks/cluster/hosts_setup_tasks.yml
+- name: Setup NTP
+  hosts: controllers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/ntp_tasks.yml
+- name: Setup SSH
+  hosts: controllers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/ssh_setup_tasks.yml
+  - name: Generate ssh key
+    shell: ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa 2>/dev/null <<< y >/dev/null
+  - name: Fetch ssh pub key from remote
+    fetch:
+      src: ~/.ssh/id_rsa.pub
+      dest: "{{ playbook_dir }}/conf/"
+      flat: yes
+- name: Setup Munge
+  hosts: controllers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/munge_setup_tasks.yml
+  - name: Generate Munge key
+    become: yes
+    shell: |
+      /usr/sbin/create-munge-key -rf
+  - name: Fetch Munge key from remote
+    become: yes
+    fetch:
+      src: /etc/munge/munge.key
+      dest: "{{ playbook_dir }}/conf/munge.key"
+      flat: yes
+  - import_tasks: tasks/cluster/munge_config_tasks.yml
+- name: Setup Slurm
+  hosts: controllers
+  gather_facts: false
+  vars:
+    slurm_ver: "20.02.5" 
+  tasks:
+    - import_tasks: tasks/cluster/slurm_setup_tasks.yml
+    - name: Install slurmctld
+      become: yes
+      shell: |
+        cd rpmbuild/RPMS/x86_64/
+        yum -y install slurm-slurmctld-{{ slurm_ver }}*rpm
+    - import_tasks: tasks/cluster/slurm_config_tasks.yml
+    - name: Start and enable slurmctld
+      become: yes
+      service:
+        name: slurmctld
+        state: started
+        enabled: yes
+- name: Setup helpers
+  hosts: controllers
+  gather_facts: true
+  tasks:
+    - import_tasks: tasks/cluster/helpers_setup_tasks.yml

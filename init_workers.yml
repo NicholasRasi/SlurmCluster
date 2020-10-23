@@ -1,0 +1,70 @@
+- name: Setup hostname and hosts file
+  hosts: workers
+  gather_facts: false
+  tasks:
+  - name: Change hostname
+    become: yes
+    hostname:
+      name: "worker{{ play_hosts.index(inventory_hostname)|int+1 }}"
+  - debug: msg="setting up worker {{ play_hosts.index(inventory_hostname)|int+1 }}"
+  - import_tasks: tasks/cluster/hosts_setup_tasks.yml
+- name: Setup NTP
+  hosts: workers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/ntp_tasks.yml
+- name: Setup SSH
+  hosts: workers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/ssh_setup_tasks.yml
+  - name: Copy ssh pub key to remote
+    authorized_key:
+      user: "{{ ansible_user }}"
+      state: present
+      key: "{{ lookup('file', rsa_file) }}"
+    vars:
+      rsa_file: "{{ playbook_dir }}/conf/id_rsa.pub"
+- name: Setup NFS
+  hosts: workers
+  gather_facts: true
+  tasks:
+  - import_tasks: tasks/cluster/worker_nfs_tasks.yml
+- name: Setup Munge
+  hosts: workers
+  gather_facts: false
+  tasks:
+  - import_tasks: tasks/cluster/munge_setup_tasks.yml
+  - name: Copy Munge key to remote
+    become: yes
+    copy:
+      src: "{{ playbook_dir }}/conf/munge.key"
+      dest: /etc/munge/munge.key
+      owner: munge
+      group: munge
+      mode: '400'
+  - import_tasks: tasks/cluster/munge_config_tasks.yml
+- name: Setup Slurm
+  hosts: workers
+  gather_facts: false
+  vars:
+    slurm_ver: "20.02.5" 
+  tasks:
+    - import_tasks: tasks/cluster/slurm_setup_tasks.yml
+    - name: Install slurmd
+      become: yes
+      shell: |
+        cd rpmbuild/RPMS/x86_64/
+        yum -y install slurm-libpmi-{{ slurm_ver }}*rpm slurm-slurmd-{{ slurm_ver }}*rpm
+    - import_tasks: tasks/cluster/slurm_config_tasks.yml
+    - name: Copy cgroup file to remote
+      become: yes
+      copy:
+        src: "{{ playbook_dir }}/conf/cgroup.conf"
+        dest: /etc/slurm/cgroup.conf
+    - name: Start and enable slurmd
+      become: yes
+      service:
+        name: slurmd
+        state: started
+        enabled: yes

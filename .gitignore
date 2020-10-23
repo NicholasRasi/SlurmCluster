@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+inventory_t
+conf/id_rsa.pub
+conf/munge.key

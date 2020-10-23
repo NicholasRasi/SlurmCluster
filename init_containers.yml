@@ -1,0 +1,13 @@
+- name: Setup containers
+  hosts: controllers,workers
+  gather_facts: true
+  vars:
+    go_ver: "1.13.5"
+    singularity_ver: "3.6.4"
+    charliecloud_ver: "0.19"
+    sarus_ver: "1.3.0"
+  tasks:
+  - import_tasks: tasks/containers/docker_setup_tasks.yml
+  - import_tasks: tasks/containers/singularity_setup_tasks.yml
+  - import_tasks: tasks/containers/charliecloud_setup_tasks.yml
+  - import_tasks: tasks/containers/sarus_setup_tasks.yml

@@ -1,0 +1,12 @@
+- name: Download and extract mpiBench
+  unarchive:
+    copy: no
+    src: "https://codeload.github.com/LLNL/mpiBench/tar.gz/master"
+    dest: "{{ ansible_env.HOME }}/workspace"
+- name: Compile mpiBench
+  become: yes
+  shell: |
+    source /etc/profile.d/modules.sh
+    cd {{ ansible_env.HOME }}/workspace/mpiBench-master
+    module purge && module load {{ mpi_module }}
+    make

@@ -1,0 +1,5 @@
+- include: init_controllers.yml
+- include: init_nas.yml
+- include: init_workers.yml
+- include: init_containers.yml
+- include: init_benchmarks.yml

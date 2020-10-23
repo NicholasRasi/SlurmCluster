@@ -1,0 +1,66 @@
+- name: Install Sarus deps
+  become: yes
+  yum:
+    name:
+      - epel-release
+      - centos-release-scl-rh
+      - glibc-static
+      - sudo
+      - curl
+      - wget
+      - rsync
+      - which
+      - make
+      - bzip2
+      - autoconf
+      - automake
+      - libtool
+      - container-selinux
+      - squashfs-tools
+      - libcap-devel
+      - zlib-devel
+      - zlib-static
+      - openssl-devel
+      - expat-devel
+      - git
+      - python3
+      - python3-pip
+      - python3-setuptools
+    state: latest
+- name: Load required kernel modules
+  become: yes
+  shell: |
+    modprobe loop
+    modprobe squashfs
+    modprobe overlay
+- name: Create Sarus installation directory
+  become: yes
+  file:
+    path: /opt/sarus
+    state: directory
+- name: Download and extract Sarus
+  become: yes
+  unarchive:
+    copy: no
+    src: "https://github.com/eth-cscs/sarus/releases/download/{{ sarus_ver }}/sarus-Release.tar.gz"
+    dest: /opt/sarus
+- name: Install Sarus
+  shell: |
+    cd /opt/sarus/{{ sarus_ver }}-Release
+    ./configure
+    sudo ./configure_installation.sh
+- name: Link SSL certificates
+  ignore_errors: yes
+  become: yes
+  shell: ln -s /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/ssl/cert.pem
+- name: Add Sarus to PATH
+  lineinfile:
+    line: export PATH=/opt/sarus/{{ sarus_ver }}-Release/bin:${PATH}
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    state: present
+- name: Test Sarus
+  shell: |
+    sarus pull alpine
+    sarus run alpine cat /etc/os-release
+  register: sarus_output
+- debug: msg="sarus_output {{ sarus_output.stdout }}"

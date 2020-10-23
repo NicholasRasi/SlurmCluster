@@ -1,0 +1,15 @@
+- name: Copy get_ib_pkey bash function
+  blockinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    block: "{{ lookup('file', pkeys_file) }}"
+    backup: yes
+  vars:
+    pkeys_file: "{{ playbook_dir }}/conf/pkeys.sh"
+- name: Install htop, lrzsz
+  become: yes
+  yum:
+    name:
+      - epel-release
+      - htop
+      - lrzsz
+    state: latest

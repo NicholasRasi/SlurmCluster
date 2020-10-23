@@ -1,0 +1,54 @@
+- name: Download and extract CharlieCloud
+  unarchive:
+    copy: no
+    src: "https://github.com/hpc/charliecloud/releases/download/v{{ charliecloud_ver }}/charliecloud-{{ charliecloud_ver }}.tar.gz"
+    dest: "{{ ansible_env.HOME }}"
+- name: Install CharlieCloud
+  shell: |
+    cd charliecloud-{{ charliecloud_ver }}
+    ./configure
+    make
+    sudo make install
+- name: Install python3
+  become: yes
+  yum:
+    name: python3
+    state: latest
+- name: Install ch-grow deps lark-parser requests
+  become: yes
+  pip:
+    name:
+      - lark-parser
+      - requests
+    executable: pip3
+- name: Check user.max_user_namespaces
+  become: yes
+  shell: sysctl -a | grep user.max_user_namespaces
+  register: max_user_namespaces
+- debug: msg="{{ max_user_namespaces.stdout }}"
+- name: Add a value to the user.max_user_namespaces kernel tuneable
+  become: yes
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: user.max_user_namespaces=15076
+    state: present
+- name: Ping the machine
+  ping:
+- name: Reboot the machine
+  become: yes
+  reboot:
+- name: Check user.max_user_namespaces
+  become: yes
+  shell: sysctl -a | grep user.max_user_namespaces
+  register: max_user_namespaces
+- debug: msg="{{ max_user_namespaces.stdout }}"
+- name: Build CharlieCloud example
+  shell: |
+    cd {{ ansible_env.HOME }}/charliecloud-0.19/examples/hello
+    ch-build -b ch-grow -t hello .
+    ch-builder2tar hello /var/tmp
+    ch-tar2dir /var/tmp/hello.tar.gz /var/tmp
+- name: Test CharlieCloud
+  shell: ch-run /var/tmp/hello -- echo "I'm in a container"
+  register: charliecloud_output
+- debug: msg="charliecloud_output {{ charliecloud_output.stdout }}"

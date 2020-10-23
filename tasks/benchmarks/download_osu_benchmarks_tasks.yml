@@ -1,0 +1,14 @@
+- name: Download and extract Osu micro benchmarks
+  unarchive:
+    copy: no
+    src: "http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-{{ osu_bench_ver }}.tar.gz"
+    dest: "{{ ansible_env.HOME }}/workspace"
+- name: Install Osu micro benchmarks
+  become: yes
+  shell: |
+    source /etc/profile.d/modules.sh
+    cd {{ ansible_env.HOME }}/workspace/osu-micro-benchmarks-{{ osu_bench_ver }}
+    module purge && module load {{ mpi_module }}
+    ./configure CC=mpicc CXX=mpicxx
+    make
+    make install
