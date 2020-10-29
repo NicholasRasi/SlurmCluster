@@ -1,5 +1,5 @@
 - name: Setup hostname and hosts file
-  hosts: controllers
+  hosts: nas
   gather_facts: false
   tasks:
   - name: Change hostname
@@ -12,7 +12,7 @@
   - import_tasks: tasks/cluster/hosts_setup_tasks.yml
     when: external_nas is defined and external_nas == "Y"
 - name: Setup NFS
-  hosts: controllers
+  hosts: nas
   gather_facts: true
   tasks:
   - import_tasks: tasks/cluster/nas_nfs_tasks.yml

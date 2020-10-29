@@ -44,9 +44,9 @@
 - debug: msg="{{ max_user_namespaces.stdout }}"
 - name: Build CharlieCloud example
   shell: |
-    cd {{ ansible_env.HOME }}/charliecloud-0.19/examples/hello
+    cd {{ ansible_env.HOME }}/charliecloud-{{ charliecloud_ver }}/examples/hello
     ch-build -b ch-grow -t hello .
-    ch-builder2tar hello /var/tmp
+    ch-builder2tar -b ch-grow hello /var/tmp
     ch-tar2dir /var/tmp/hello.tar.gz /var/tmp
 - name: Test CharlieCloud
   shell: ch-run /var/tmp/hello -- echo "I'm in a container"

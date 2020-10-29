@@ -1,5 +1,10 @@
-- include: init_controllers.yml
-- include: init_nas.yml
-- include: init_workers.yml
-- include: init_containers.yml
-- include: init_benchmarks.yml
+- name: Init controllers
+  import_playbook: init_controllers.yml
+- name: Init nas
+  import_playbook: init_nas.yml
+- name: Init workers
+  import_playbook: init_workers.yml
+- name: Init containers
+  import_playbook: init_containers.yml
+- name: Init benchmarks
+  import_playbook: init_benchmarks.yml
