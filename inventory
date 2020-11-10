@@ -1,12 +1,12 @@
 [controllers]
-controller1 ansible_host=52.143.26.115 ansible_port=50000
+controller1 ansible_host=52.137.56.57 ansible_port=50001
 
 [nas]
-nas1 ansible_host=52.143.26.115 ansible_port=50000
+nas1 ansible_host=52.137.56.57 ansible_port=50001
 
 [workers]
-worker1 ansible_host=52.143.26.115 ansible_port=50001
-worker2 ansible_host=52.143.26.115 ansible_port=50003
+worker1 ansible_host=52.137.56.57 ansible_port=50002
+worker2 ansible_host=52.137.56.57 ansible_port=50004
 
 [all:vars]
 ansible_user=azureuser

@@ -131,3 +131,5 @@ dmypy.json
 inventory_t
 conf/id_rsa.pub
 conf/munge.key
+conf/hosts
+invetory

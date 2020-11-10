@@ -2,7 +2,7 @@
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 # nodes
-10.0.0.4 nfs1
-10.0.0.4 controller1
-10.0.0.5 worker1
-10.0.0.7 worker2
+10.0.0.5 nfs1
+10.0.0.5 controller1
+10.0.0.6 worker1
+10.0.0.8 worker2

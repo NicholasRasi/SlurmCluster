@@ -47,7 +47,6 @@
 - name: Install Sarus
   shell: |
     cd /opt/sarus/{{ sarus_ver }}-Release
-    ./configure
     sudo ./configure_installation.sh
 - name: Link SSL certificates
   ignore_errors: yes
